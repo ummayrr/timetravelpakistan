@@ -1,0 +1,21 @@
+{
+  "name": "instagram-poster",
+  "version": "1.0.0",
+  "description": "An app that posts to Instagram every minute",
+    "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": ["instagram", "post", "node"],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "cron": "^1.8.2",
+    "dotenv": "^10.0.0",
+    "instagram-private-api": "^1.45.3",
+    "util": "^0.12.4",
+    "fs": "^0.0.2"
+  }
+}
