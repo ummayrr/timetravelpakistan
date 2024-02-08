@@ -1,25 +1,24 @@
 import express from "express";
 import { CronJob } from "cron";
-import dotenv from "dotenv";
 import { IgApiClient } from "instagram-private-api";
 import { promisify } from "util";
 import { readFile } from "fs";
 
 const app = express();
 const readFileAsync = promisify(readFile);
-dotenv.config();
 
 app.use(express.static("public"));
-app.listen(process.env.PORT || 3000, function () {});
+app.listen(3000, function () {});
 
 app.get("/", function (request, response) {
-  response.send('up and running');
+  response.send('stoichive is currently up and running <br><br> - Instagram @stoichive');
 });
 
 async function instagramPost() {
   try {
     console.log("Posting to Instagram begins..");
-    const { username, password } = process.env;
+    const username = "your_username"; // replace with your username
+    const password = "your_password"; // replace with your password
     const ig = new IgApiClient();
     const caption = "Enter caption here";
     ig.state.generateDevice(username);
