@@ -1,0 +1,47 @@
+import wikipediaapi
+import datetime
+import pandas as pd
+from bs4 import BeautifulSoup
+import requests
+import re
+
+date = input("Enter the date (MM/DD): ")
+
+date_input = date
+month, day = map(int, date_input.split('/'))
+date_formatted = datetime.datetime(year=1, month=month, day=day).strftime('%B_%d')
+
+url = 'https://en.wikipedia.org/wiki/' + date_formatted
+
+response = requests.get(url)
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+events = {'Births': [], 'Deaths': [], 'Events': []}
+unique_events = set()
+
+for section in events.keys():
+    section_content = soup.find('span', {'id': section}).parent.find_next_siblings(['ul', 'ol'])
+    for ul in section_content:
+        if ul.find_previous_sibling().name == 'h2':
+            break
+        for li in ul.find_all('li'):
+            if 'Pakistan' in li.text and li.text not in unique_events:
+                year, description = re.split(' – | : ', li.text.strip(), 1)
+                year = year.strip()
+                description = re.sub(r'\[\d+\]', '', description).strip()
+                formatted_date = f"{day} {datetime.datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
+                if section == 'Births':
+                    events[section].append(f"{formatted_date}: Birth of {description}")
+                elif section == 'Deaths':
+                    events[section].append(f"{formatted_date}: Death of {description}")
+                else:
+                    events[section].append(f"{formatted_date}: {description}")
+                unique_events.add(li.text)
+
+for category, items in events.items():
+    if items:
+        print(category)
+        for item in items:
+            print(item)
+        print("\n")
