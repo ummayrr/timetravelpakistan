@@ -17,8 +17,8 @@ app.get("/", function (request, response) {
 async function instagramPost() {
   try {
     console.log("Posting to Instagram begins..");
-    const username = "your_username"; // replace with your username
-    const password = "your_password"; // replace with your password
+    const username = "username"; 
+    const password = "password"; 
     const ig = new IgApiClient();
     const caption = "Enter caption here";
     ig.state.generateDevice(username);
@@ -34,7 +34,7 @@ async function instagramPost() {
   }
 }
 
-// Run every minute
+// every minute
 let dailyPost = new CronJob(
   "* * * * *",
   function () {
