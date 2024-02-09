@@ -35,7 +35,7 @@ async function instagramPost() {
   }
 }
 
-// Run every minute
+// every minute
 let dailyPost = new CronJob(
   "* * * * *",
   function () {
