@@ -2,6 +2,7 @@ import wikipediaapi
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 import re
 
 def get_event_on_date(date):
@@ -54,5 +55,10 @@ def get_event_on_date(date):
     else:
         print("No event found for this date.")
 
-date = input("Enter a date (e.g., 18 August): ")
+def convert_date_format(date):
+    date_object = datetime.strptime(date, "%m/%d")
+    return date_object.strftime("%-d %B")
+    
+date = input("Enter a date in MM/DD format: ")
+date = convert_date_format(date)
 get_event_on_date(date)
