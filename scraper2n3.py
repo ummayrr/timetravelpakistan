@@ -5,8 +5,9 @@ from bs4 import BeautifulSoup
 import re
 
 def get_event_on_date(date):
-    found = False
+    events = []
 
+  
     wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='TimeTravelPakistan')
     page = wiki_wiki.page('Timeline_of_Pakistani_history')
 
@@ -19,10 +20,20 @@ def get_event_on_date(date):
             elif line.startswith(date):
                 if re.search(r'\d{4}', line) is None and current_year is not None:
                     event = line.replace(date + ': ', '')
-                    print(f"{date} {current_year}: {event}")
+                    events.append(f"{date} {current_year}: {event}")
                 else:
-                    print(line)
-                found = True
+                    year_match = re.search(r'\d{4}', line)
+                    if year_match:
+                        year = year_match.group(0)
+                        event = line.replace(date + ': ', '').strip()
+                        event = re.sub(r'^' + date + ' ', '', event)
+                        event = re.sub(r'^:', '', event).strip() 
+                        event = re.sub(r'^' + date.split()[1] + ' ', '', event)  
+                        event = re.sub(r'^\s+', '', event) 
+                        if event.startswith(year): 
+                            event = event.replace(year, '', 1).strip() 
+                        event = re.sub(r'^:', '', event).strip()  
+                        events.append(f"{date} {year}: {event}")
 
     url = "https://en.wikipedia.org/wiki/Timeline_of_Pakistani_history"
     response = requests.get(url)
@@ -35,10 +46,12 @@ def get_event_on_date(date):
             for index, row in table.iterrows():
                 if row['Date'] == date:
                     event = re.sub(r'\[\d+\]', '', row['Event']) 
-                    print(f"{row['Date']} {row['Year']}: {event}")
-                    found = True
+                    events.append(f"{row['Date']} {row['Year']}: {event}")
 
-    if not found:
+    if events:
+        for event in events:
+            print(event)
+    else:
         print("No event found for this date.")
 
 date = input("Enter a date (e.g., 18 August): ")
