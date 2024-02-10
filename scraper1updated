@@ -19,7 +19,6 @@ soup = BeautifulSoup(response.text, 'html.parser')
 
 events = {'Births': [], 'Deaths': [], 'Events': []}
 unique_events = set()
-
 for section in events.keys():
     section_content = soup.find('span', {'id': section}).parent.find_next_siblings(['ul', 'ol'])
     for ul in section_content:
@@ -27,18 +26,19 @@ for section in events.keys():
             break
         for li in ul.find_all('li'):
             if 'Pakistan' in li.text and li.text not in unique_events:
-                year, description = re.split(' – | : ', li.text.strip(), 1)
-                year = year.strip()
-                description = re.sub(r'\[\d+\]', '', description).strip()
+                split_text = re.split(' – | : ', li.text.strip(), 1)
+                year = split_text[0].strip()
+                description = re.sub(r'\[\d+\]', '', split_text[1]).strip() if len(split_text) > 1 else ""
                 formatted_date = f"{day} {datetime.datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
-                if section == 'Births':
+                if '(b.' in description:
+                    events['Deaths'].append(f"{formatted_date}: Death of {description}")
+                elif section == 'Births':
                     events[section].append(f"{formatted_date}: Birth of {description}")
-                elif section == 'Deaths':
-                    events[section].append(f"{formatted_date}: Death of {description}")
                 else:
                     events[section].append(f"{formatted_date}: {description}")
                 unique_events.add(li.text)
 
+print("\n")
 for category, items in events.items():
     if items:
         print(category)
