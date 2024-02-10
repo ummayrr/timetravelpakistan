@@ -6,7 +6,7 @@ def get_event_on_date(date):
     page = wiki_wiki.page('Timeline_of_Pakistani_history')
 
     if not page.exists():
-        print("Page nottt found")
+        print("Page not found")
         return
 
     lines = page.text.split('\n')
@@ -20,11 +20,24 @@ def get_event_on_date(date):
                 event = line.replace(date + ': ', '')
                 print(f"{date} {current_year}: {event}")
             else:
-                print(line)
+                year_match = re.search(r'\d{4}', line)
+                if year_match:
+                    year = year_match.group(0)
+                    event = line.replace(date + ': ', '').strip()
+                    event = re.sub(r'^' + date + ' ', '', event)
+                    event = re.sub(r'^:', '', event).strip() 
+                    event = re.sub(r'^' + date.split()[1] + ' ', '', event)  
+                    event = re.sub(r'^\s+', '', event) 
+                    if event.startswith(year): 
+                        event = event.replace(year, '', 1).strip() 
+                    event = re.sub(r'^:', '', event).strip()  
+                    print(f"{date} {year}: {event}")
+                else:
+                    print(line)
             found = True
 
     if not found:
-        print("Nno event found for thisss date.")
+        print("No event found for this date.")
 
-date = input("Enter a date, 18 August ")
+date = input("Enter a date, e.g., '18 August' ")
 get_event_on_date(date)
