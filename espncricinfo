@@ -1,0 +1,24 @@
+from bs4 import BeautifulSoup
+import requests
+import re
+
+url = "https://www.espncricinfo.com/on-this-day/cricket-events/march/25"
+
+response = requests.get(url)
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+divs = soup.find_all('div')
+
+unique_div_texts = set()
+
+for i, div in enumerate(divs):
+    text = div.text.strip()
+
+    if len(text) > 1000:
+        continue
+
+    if re.match(r'^\d{4}', text):
+        if text not in unique_div_texts and 'Pakistan' in text:
+            print(f"{text}")
+            unique_div_texts.add(text)
