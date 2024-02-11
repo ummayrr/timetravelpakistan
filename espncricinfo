@@ -27,9 +27,13 @@ for i, div in enumerate(divs):
         continue
 
     if re.match(r'^\d{4}', text):
-        if text not in unique_div_texts and 'pakistan' in text.lower():
-            text = text.replace('\n', ' ')
-            year = re.search(r'\b\d{4}\b', text).group()
-            formatted_text = text.replace(year, '',  1).strip()
-            print(f"{date2} {year}: {formatted_text}")
-            unique_div_texts.add(text)
+        lower_text = text.lower()
+        if 'pakistan' in lower_text:
+            count_pakistan = lower_text.count('pakistan')
+            if not (count_pakistan == 1 and ('against pakistan' in lower_text or 'over pakistan' in lower_text or 'and a tour to pakistan' in lower_text or 'caught short by pakistan' in lower_text or 'played three three tests for england in pakistan' in lower_text or 'with pakistan bowlers dropping' in lower_text or 'after nazar mohammad of pakistan' in lower_text or 'return to the side in 2015' in lower_text or 'famous test win over pakistan in harare' in lower_text or 'ending pakistan' in lower_text or 'conquered pakistan' in lower_text or re.search(r'against .* and pakistan', lower_text) or re.search(r'against .*, pakistan', lower_text) or re.search(r'against .*, and pakistan', lower_text) or re.search(r'against .*, .*, and pakistan', lower_text) or re.search(r'against .*, .*, .*, and pakistan', lower_text))):
+              if text not in unique_div_texts:
+                    text = text.replace('\n', ' ')
+                    year = re.search(r'\b\d{4}\b', text).group()
+                    formatted_text = text.replace(year, '',  1).strip()
+                    print(f"{date2} {year}: {formatted_text}")
+                    unique_div_texts.add(text)
