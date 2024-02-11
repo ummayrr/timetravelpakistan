@@ -1,8 +1,16 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import calendar
 
-url = "https://www.espncricinfo.com/on-this-day/cricket-events/march/25"
+date = input("Please enter the date in MM/DD format: ")
+
+month, day = date.split('/')
+
+month = calendar.month_name[int(month)].lower()
+
+url = f"https://www.espncricinfo.com/on-this-day/cricket-events/{month}/{day}"
+date2 = f"{day} {month.capitalize()}"
 
 response = requests.get(url)
 
@@ -15,10 +23,13 @@ unique_div_texts = set()
 for i, div in enumerate(divs):
     text = div.text.strip()
 
-    if len(text) > 1000:
+    if len(text) >  1350:
         continue
 
     if re.match(r'^\d{4}', text):
-        if text not in unique_div_texts and 'Pakistan' in text:
-            print(f"{text}")
+        if text not in unique_div_texts and 'pakistan' in text.lower():
+            text = text.replace('\n', ' ')
+            year = re.search(r'\b\d{4}\b', text).group()
+            formatted_text = text.replace(year, '',  1).strip()
+            print(f"{date2} {year}: {formatted_text}")
             unique_div_texts.add(text)
