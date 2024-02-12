@@ -116,15 +116,23 @@ for section in events_3.keys():
                     events_3['Events'].append(f"{formatted_date}: {description}")
                 unique_events.add(li.text)
 
-#Scraper 1 (espncricinfo)
-for event in events_1:
+# combining all events
+all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
+
+events_dict = {}
+
+for event in all_events:
+    date_year, description = event.split(": ", 1)
+    if date_year in events_dict:
+## KEEEPING ONLY OF THE DUPLICATED ONES, WHICH HAS MORE WORDS
+        if len(description.split()) > len(events_dict[date_year].split()):
+            events_dict[date_year] = description
+    else:
+        events_dict[date_year] = description
+
+
+events = [f"{date_year}: {description}" for date_year, description in events_dict.items()]
+
+# Print the events
+for event in events:
     print(event)
-#Scraper 2 (timeline of pakistan history)
-if events_2:
-    for event in events_2:
-        print(event)
-#Scraper 3 (births,deaths,events page)
-for category, items in events_3.items():
-    if items:
-        for item in items:
-            print(item)
