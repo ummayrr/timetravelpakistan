@@ -149,7 +149,7 @@ async def main() -> None:
     await sydney.reset_conversation(style="precise")
     question = "Optimize the text for an instagram post, add a little background after the heading with interesting information in simple words. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "  
     question2 = "Optimize the text for an instagram post, make the text a little simpler, add any useful info and you can cut useless info. There should be heading before. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "
-    image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only person's name and one profession only for 'birth of' and 'death of' events. Remove any useless information. If it cricket related, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
+    image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. If the event is of cricket, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
 
     for i, event in enumerate(events, start=1):
         if event in events_1:
@@ -159,6 +159,7 @@ async def main() -> None:
         image_prompt = image_prompt_base_text + event
         await sydney.reset_conversation(style="precise")
         image_prompt_response = await sydney.ask(image_prompt, citations=False)
+        image_prompt_response = image_prompt_response.replace('"', '')
         with open(f'text{i}original.txt', 'w') as f:
             f.write(image_prompt_response)
         await sydney.reset_conversation(style="precise")
