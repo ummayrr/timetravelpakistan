@@ -3,8 +3,8 @@ import json
 import os
 import glob
 
-cse_id = "e04372cb154a54723"
-api_key = "AIzaSyAR5B6jKe0YECY0jcJc7PlWaFewTXoTTxc"
+cse_id = ""
+api_key = ""
 
 #delete 20 images
 for i in range(1, 21):
