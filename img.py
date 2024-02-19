@@ -3,8 +3,8 @@ import json
 import os
 import glob
 
-cse_id = ""
-api_key = ""
+cse_id = "e04372cb154a54723"
+api_key = "AIzaSyAR5B6jKe0YECY0jcJc7PlWaFewTXoTTxc"
 
 #delete 20 images
 for i in range(1, 21):
@@ -12,7 +12,6 @@ for i in range(1, 21):
         if os.path.isfile(file):
             os.remove(file)
             print(f'Deleted: {file}')
-
 
 num_files = len([name for name in os.listdir('.') if os.path.isfile(name) and name.startswith('text') and not name.endswith('original.txt')])
 
@@ -30,6 +29,8 @@ for i in range(1, num_files+1):
 
     # determining extension
     file_extension = os.path.splitext(image_url)[1]
+    if file_extension == '':
+        file_extension = '.jpg'
     filename = f'image{i}{file_extension}'
 
     # downloading image
