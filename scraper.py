@@ -10,6 +10,8 @@ from datetime import datetime
 import os
 from sydney import SydneyClient
 
+
+#har mahine update karna hai bhai
 os.environ["BING_COOKIES"] = os.getenv("BING_COOKIES_MAIN")
 
 
@@ -29,6 +31,7 @@ def get_event_on_date(date):
                     event = line.replace(date + ': ', '')
                     events.append(f"{date} {current_year}: {event}")
                 else:
+                #oye tu ne tables pe kiun ni search kia
                     year_match = re.search(r'\d{4}', line)
                     if year_match:
                         year = year_match.group(0)
@@ -47,7 +50,7 @@ def get_event_on_date(date):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     tables = pd.read_html(url)
-
+#yeh pehlay wale kaam se kiun nai nikla? alehda mehnat karni pari 
     for table in tables:
         if 'Date' in table.columns:
             for index, row in table.iterrows():
@@ -58,18 +61,20 @@ def get_event_on_date(date):
     return events
 
 def convert_date_format(date):
+# sorry bhai, jugaad hai lekin chalta hai bhai
     date_object = datetime.strptime(date, "%m/%d")
     return date_object.strftime("%-d %B")
 
 async def main():
     while True:
         try:
-            date = input("Enter a date in MM/DD format: ")
+            date = datetime.now().strftime('%m/%d')
             date_converted = convert_date_format(date)
 
             # Scraper 1
             month, day = date.split('/')
             month = calendar.month_name[int(month)].lower()
+            #shukria espn wale bhai
             url = f"https://www.espncricinfo.com/on-this-day/cricket-events/{month}/{day}"
             date2 = f"{day} {month.capitalize()}"
             response = requests.get(url)
@@ -80,12 +85,14 @@ async def main():
 
             for i, div in enumerate(divs):
                 text = div.text.strip()
+                #bhai yeh kaam bhi sahi nahi hai, lekin itna toh chalta hai bhai
                 if len(text) >  1350:
                     continue
                 if re.match(r'^\d{4}', text):
                     lower_text = text.lower()
                     if 'pakistan' in lower_text:
                         count_pakistan = lower_text.count('pakistan')
+                        #is pe koi baat nahi hogi:
                         if not (count_pakistan == 1 and ('against pakistan' in lower_text or 'over pakistan' in lower_text or 'and a tour to pakistan' in lower_text or 'against a rather modest' in lower_text or 'caught short by pakistan' in lower_text or 'played three three tests for england in pakistan' in lower_text or 'england a squad to tour pakistan' in lower_text or 'with pakistan bowlers dropping' in lower_text or 'after nazar mohammad of pakistan' in lower_text or 'return to the side in 2015' in lower_text or 'famous test win over pakistan in harare' in lower_text or 'ending pakistan' in lower_text or 'conquered pakistan' in lower_text or re.search(r'against .* and pakistan', lower_text) or re.search(r'against .*, pakistan', lower_text) or re.search(r'against .*, and pakistan', lower_text) or re.search(r'against .*, .*, and pakistan', lower_text) or re.search(r'against .*, .*, .*, and pakistan', lower_text))):
                             if text not in unique_div_texts:
                                 text = text.replace('\n', ' ')
@@ -94,10 +101,10 @@ async def main():
                                 events_1.append(f"{date2} {year}: {formatted_text}")
                                 unique_div_texts.add(text)
 
-            # Scraper 2
+            # scraper 2
             events_2 = get_event_on_date(date_converted)
 
-            # Scraper 3
+            # scraper 3
             date_input = date
             month, day = map(int, date_input.split('/'))
             date_formatted = datetime(year=1, month=month, day=day).strftime('%B_%d')
@@ -118,6 +125,7 @@ async def main():
                             year = split_text[0].strip()
                             description = re.sub(r'\[\d+\]', '', split_text[1]).strip() if len(split_text) > 1 else ""
                             formatted_date = f"{day} {datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
+                            #bhai yeh kaam sahi code nahi hua hai bhai, lekin chal raha hai bhai
                             if '(b.' in description:
                                 events_3['Deaths'].append(f"{formatted_date}: Death of {description}")
                             elif section == 'Births':
@@ -126,7 +134,7 @@ async def main():
                                 events_3['Events'].append(f"{formatted_date}: {description}")
                             unique_events.add(li.text)
 
-            # combining all events
+            # combining all events bhai
             all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
 
             events_dict = {}
@@ -142,7 +150,7 @@ async def main():
             events = [f"{date_year}: {description}" for date_year, description in events_dict.items()]
 
             async def main() -> None:
-                # Delete existing text files
+                # saare saboot mita do bhai
                 for i in range(1, 21):
                     if os.path.exists(f'text{i}.txt'):
                         os.remove(f'text{i}.txt')
@@ -150,7 +158,7 @@ async def main():
                         os.remove(f'text{i}original.txt')
 
                 async with SydneyClient(style="precise") as sydney:
-                    await sydney.reset_conversation(style="precise")
+                    await sydney.reset_conversation(style="precise") #bhai
                     question = "Optimize the text for an instagram post, add a little background after the heading with interesting information in simple words. Heading should only include the date, followed by a colon. Censor any strong words like suicide to su__ic__ide, bombing to b__o__mbing, etc. Do not add any emotions, only facts. Text: "  
                     question2 = "Optimize the text for an instagram post, make the text a little simpler, add any useful info and you can cut useless info. There should be heading before. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "
                     image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. If the event is of cricket, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
@@ -167,10 +175,12 @@ async def main():
                         with open(f'text{i}original.txt', 'w') as f:
                             f.write(image_prompt_response)
                         await sydney.reset_conversation(style="precise")
-                        response = await sydney.ask(question_to_ask, citations=False)
+                        response = await sydney.ask(question_to_ask, citations=False) #nahi chahiye bhai
                         response = re.sub(r'\[\^.\^\]', '', response)
                         response = response.replace('**', '')
-                        response = '📅 ' + response
+                        response = '📅 ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
+                        response = response + '\n\n'
+                        response = response + '📷 #Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
                         with open(f'text{i}.txt', 'w') as f:
                             f.write(response)
                         print(response, end="", flush=True)
@@ -178,12 +188,12 @@ async def main():
                     await sydney.close_conversation()
 
             if __name__ == "__main__":
-                asyncio.run(main())
-            break  # if successful
+                await main()
+            break  # agar kaam khtm hua toh bhai
         except Exception as e:
-            print(f"An error occurred: {e}")
-            wait_time = random.uniform(3600, 5400)  # 1 hour to 1 and half hour
-            print(f"Retrying after {wait_time/3600} hours...")
+            print(f"fukkkkkkkkkkkkk whatever is this: {e}")
+            wait_time = random.uniform(3600, 5400)  # ghanta se le ke ghanta.5 tak bhai
+            print(f"dobara try after {wait_time/3600} hours...")
             await asyncio.sleep(wait_time) 
 
 if __name__ == "__main__":
