@@ -10,7 +10,7 @@ from datetime import datetime
 import os
 from sydney import SydneyClient
 
-os.environ["BING_COOKIES"] = ""
+os.environ["BING_COOKIES"] = os.getenv("BING_COOKIES_MAIN")
 
 
 def get_event_on_date(date):
