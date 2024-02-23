@@ -1,15 +1,15 @@
 {
-  "name": "instagram-poster",
+  "name": "TimeTravelPakistan",
   "version": "1.0.0",
-  "description": "An app that posts to Instagram every minute",
+  "description": "Posts OnThisDay events related to Pakistan",
     "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
-  "keywords": ["instagram", "post", "node"],
-  "author": "Your Name",
-  "license": "ISC",
+  "keywords": ["instagram", "post", "node", "pakistan"],
+  "author": "Umair Nawaz",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
     "cron": "^1.8.2",
