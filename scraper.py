@@ -1,29 +1,177 @@
-import datetime
+from bs4 import BeautifulSoup
 import requests
+import re
+import calendar
+import wikipediaapi
+import pandas as pd
+from datetime import datetime
+import asyncio
+import os
+from sydney import SydneyClient
 
-# Get today's date
-today = datetime.datetime.now()
-date = today.strftime('%m/%d')
+os.environ["BING_COOKIES"] = ""
 
-# Wikipedia API endpoint
-url = 'https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/all/' + date
 
-# Headers for the request
-headers = {
-    'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI1NmJlNmRjMTE0MDhiYmRlMTRiOWVmMWU0MTY2YTg0YSIsImp0aSI6IjI0NTliYjMzNzRlNzQ3NTk1YWVjZWY2NDAxMzU5YTNmZTA3NGYzZTAwNDRhZDJhMTQzNTYzZjNhZjg3ZjZjOGQwNTM3NTgxMzgwODU0NjNhIiwiaWF0IjoxNzA3NDg1OTAyLjM5Nzk0NiwibmJmIjoxNzA3NDg1OTAyLjM5Nzk1LCJleHAiOjMzMjY0Mzk0NzAyLjM5NTQ4LCJzdWIiOiI3NDkzNTQ2MiIsImlzcyI6Imh0dHBzOi8vbWV0YS53aWtpbWVkaWEub3JnIiwicmF0ZWxpbWl0Ijp7InJlcXVlc3RzX3Blcl91bml0Ijo1MDAwLCJ1bml0IjoiSE9VUiJ9LCJzY29wZXMiOlsiYmFzaWMiXX0.aamee_SW6ePpqTw7j65UGAciADVIkEGV9yF7mNISOG0qzQvAtuqe7rfLlH6_Mo7t8KAoM_OU8apFGPI6Z8aNAsxjOQaOCxOKxMOis3KbCt7qSaHpOX7apRxJOUlP6DpckJ-HSwkJejlTgdBlt1wG9HLyn_OJGI-Bk2MIopV7EshKs56oC6RQM7Bu5fXEPNvTrLufehPMobT7vtBfrQKiXzt2bLSVTIf-HpNl4NfEgMZuxScLNEWLIauBPpmOomOMcZD832R8D-9XULz-7BTJYZRuyNGvUOwdKIgiB-WULPJVpHdbZxlW3SStvZODO6Yzt7CGqXis09pxW8TLhI63wMx4VkPK6lwS_dv8f0sz-XraWCfF7eM1LI0Tcy7NyrvxDwnTHGwQnJ2m8xkORFvJSHCUBaHk-uA0fbOzOIv6_4bwpIYlipbWPR_BBK7WoytB5LmpfiImtDwk5zsx9OK1rXHhEo4y9w5XW4N7N_tT0YZ7rfTV8_c8CHF0mDJe0X4zS0KKxHBHoEVWS6YhKu2pqnTPTl4c-l01ARJ1DpHuCjY-xJKYPEO-2wiht3uGOGAHrKIF8cDqPq2TQ7JKMwA_J8XyefRVxDrVeHKjKPR-uVB2Cidd9-2z0GPi6GQYQ14blRt232qS88c7vbsrJS_SIPyvb3HAzorgdCB8ZNKiUv4',  # Replace with your access token
-    'User-Agent': 'TimeTravelPakistan umairnawaz184@gmail.com'  # Replace with your app name and contact
-}
+def get_event_on_date(date):
+    events = []
+    wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='TimeTravelPakistan')
+    page = wiki_wiki.page('Timeline_of_Pakistani_history')
 
-# Send a GET request to the Wikipedia API
-response = requests.get(url, headers=headers)
+    if page.exists():
+        lines = page.text.split('\n')
+        current_year = None
+        for line in lines:
+            if re.match(r'^\d{4}$', line.strip()):
+                current_year = line.strip()
+            elif line.startswith(date):
+                if re.search(r'\d{4}', line) is None and current_year is not None:
+                    event = line.replace(date + ': ', '')
+                    events.append(f"{date} {current_year}: {event}")
+                else:
+                    year_match = re.search(r'\d{4}', line)
+                    if year_match:
+                        year = year_match.group(0)
+                        event = line.replace(date + ': ', '').strip()
+                        event = re.sub(r'^' + date + ' ', '', event)
+                        event = re.sub(r'^:', '', event).strip() 
+                        event = re.sub(r'^' + date.split()[1] + ' ', '', event)  
+                        event = re.sub(r'^\s+', '', event) 
+                        if event.startswith(year): 
+                            event = event.replace(year, '', 1).strip() 
+                        event = re.sub(r'^:', '', event).strip()  
+                        events.append(f"{date} {year}: {event}")
 
-# Parse the JSON response
-data = response.json()
+    url = "https://en.wikipedia.org/wiki/Timeline_of_Pakistani_history"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-# Print the data
-for section in ['events', 'births', 'deaths']:
-    print(f"## {section.capitalize()}")
-    print("\n")
-    for item in data[section]:
-        print(f"- {item['year']}: {item['text']}")
-    print("\n")
+    tables = pd.read_html(url)
+
+    for table in tables:
+        if 'Date' in table.columns:
+            for index, row in table.iterrows():
+                if row['Date'] == date:
+                    event = re.sub(r'\[\d+\]', '', row['Event']) 
+                    events.append(f"{row['Date']} {row['Year']}: {event}")
+
+    return events
+
+def convert_date_format(date):
+    date_object = datetime.strptime(date, "%m/%d")
+    return date_object.strftime("%-d %B")
+
+date = input("Enter a date in MM/DD format: ")
+date_converted = convert_date_format(date)
+
+# Scraper 1
+month, day = date.split('/')
+month = calendar.month_name[int(month)].lower()
+url = f"https://www.espncricinfo.com/on-this-day/cricket-events/{month}/{day}"
+date2 = f"{day} {month.capitalize()}"
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+divs = soup.find_all('div')
+unique_div_texts = set()
+events_1 = []
+
+for i, div in enumerate(divs):
+    text = div.text.strip()
+    if len(text) >  1350:
+        continue
+    if re.match(r'^\d{4}', text):
+        lower_text = text.lower()
+        if 'pakistan' in lower_text:
+            count_pakistan = lower_text.count('pakistan')
+            if not (count_pakistan == 1 and ('against pakistan' in lower_text or 'over pakistan' in lower_text or 'and a tour to pakistan' in lower_text or 'against a rather modest' in lower_text or 'caught short by pakistan' in lower_text or 'played three three tests for england in pakistan' in lower_text or 'england a squad to tour pakistan' in lower_text or 'with pakistan bowlers dropping' in lower_text or 'after nazar mohammad of pakistan' in lower_text or 'return to the side in 2015' in lower_text or 'famous test win over pakistan in harare' in lower_text or 'ending pakistan' in lower_text or 'conquered pakistan' in lower_text or re.search(r'against .* and pakistan', lower_text) or re.search(r'against .*, pakistan', lower_text) or re.search(r'against .*, and pakistan', lower_text) or re.search(r'against .*, .*, and pakistan', lower_text) or re.search(r'against .*, .*, .*, and pakistan', lower_text))):
+                if text not in unique_div_texts:
+                    text = text.replace('\n', ' ')
+                    year = re.search(r'\b\d{4}\b', text).group()
+                    formatted_text = text.replace(year, '',  1).strip()
+                    events_1.append(f"{date2} {year}: {formatted_text}")
+                    unique_div_texts.add(text)
+
+# Scraper 2
+events_2 = get_event_on_date(date_converted)
+
+# Scraper 3
+date_input = date
+month, day = map(int, date_input.split('/'))
+date_formatted = datetime(year=1, month=month, day=day).strftime('%B_%d')
+url = 'https://en.wikipedia.org/wiki/' + date_formatted
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+events_3 = {'Births': [], 'Deaths': [], 'Events': []}
+unique_events = set()
+
+for section in events_3.keys():
+    section_content = soup.find('span', {'id': section}).parent.find_next_siblings(['ul', 'ol'])
+    for ul in section_content:
+        if ul.find_previous_sibling().name == 'h2':
+            break
+        for li in ul.find_all('li'):
+            if 'Pakistan' in li.text and li.text not in unique_events:
+                split_text = re.split(' – | : ', li.text.strip(), 1)
+                year = split_text[0].strip()
+                description = re.sub(r'\[\d+\]', '', split_text[1]).strip() if len(split_text) > 1 else ""
+                formatted_date = f"{day} {datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
+                if '(b.' in description:
+                    events_3['Deaths'].append(f"{formatted_date}: Death of {description}")
+                elif section == 'Births':
+                    events_3['Births'].append(f"{formatted_date}: Birth of {description}")
+                else:
+                    events_3['Events'].append(f"{formatted_date}: {description}")
+                unique_events.add(li.text)
+
+# combining all events
+all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
+
+events_dict = {}
+
+for event in all_events:
+    date_year, description = event.split(": ", 1)
+    if date_year in events_dict:
+        if len(description.split()) < len(events_dict[date_year].split()):
+            events_dict[date_year] = description
+    else:
+        events_dict[date_year] = description
+
+events = [f"{date_year}: {description}" for date_year, description in events_dict.items()]
+
+async def main() -> None:
+  # Delete existing text files
+  for i in range(1, 21):
+    if os.path.exists(f'text{i}.txt'):
+      os.remove(f'text{i}.txt')
+    if os.path.exists(f'text{i}original.txt'):
+      os.remove(f'text{i}original.txt')
+
+  async with SydneyClient(style="precise") as sydney:
+    await sydney.reset_conversation(style="precise")
+    question = "Optimize the text for an instagram post, add a little background after the heading with interesting information in simple words. Heading should only include the date, followed by a colon. Censor any strong words like su__ic__ide, b__o__mbing, etc. Do not add any emotions, only facts. Text: "  
+    question2 = "Optimize the text for an instagram post, make the text a little simpler, add any useful info and you can cut useless info. There should be heading before. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "
+    image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. If the event is of cricket, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
+
+    for i, event in enumerate(events, start=1):
+        if event in events_1:
+            question_to_ask = question2 + event
+        else:
+            question_to_ask = question + event
+        image_prompt = image_prompt_base_text + event
+        await sydney.reset_conversation(style="precise")
+        image_prompt_response = await sydney.ask(image_prompt, citations=False)
+        image_prompt_response = image_prompt_response.replace('"', '')
+        with open(f'text{i}original.txt', 'w') as f:
+            f.write(image_prompt_response)
+        await sydney.reset_conversation(style="precise")
+        response = await sydney.ask(question_to_ask, citations=False)
+        response = re.sub(r'\[\^.\^\]', '', response)
+        response = response.replace('**', '')
+        response = '📅 ' + response
+        with open(f'text{i}.txt', 'w') as f:
+            f.write(response)
+        print(response, end="", flush=True)
+        print("\n")
+    await sydney.close_conversation()
+
+if __name__ == "__main__":
+    asyncio.run(main())
