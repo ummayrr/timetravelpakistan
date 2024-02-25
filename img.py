@@ -1,11 +1,14 @@
+import os
 import requests
 import json
-import os
 import glob
 import mimetypes
+from dotenv import load_dotenv
 
-cse_id = ""
-api_key = ""
+load_dotenv()
+
+cse_id=os.getenv("cse_id_main")
+api_key=os.getenv("api_key_main")
 
 download_directory = "downloads"
 
@@ -41,10 +44,20 @@ for i in range(1, num_files+1):
         content_type = response.headers['content-type']
         extension = mimetypes.guess_extension(content_type)
 
+        if not extension:
+            extension = '.png'
+
         filename = f'image{i}{extension}'
 
         with open(os.path.join(download_directory, filename), 'wb') as out_file:
             out_file.write(response.content)
+
+        file_size = os.path.getsize(os.path.join(download_directory, filename))
+        if file_size < 20 * 1024:  # 20KB
+            os.remove(os.path.join(download_directory, filename))
+            print(f'Deleted: {os.path.join(download_directory, filename)} due to chhota size.')
+            start_index += 1
+            continue
 
         print('Image downloaded:', os.path.join(download_directory, filename))
         break

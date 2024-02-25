@@ -9,11 +9,13 @@ import pandas as pd
 from datetime import datetime
 import os
 from sydney import SydneyClient
+from dotenv import load_dotenv
 
+load_dotenv()
 
 #har mahine update karna hai bhai
-os.environ["BING_COOKIES"] = os.getenv("BING_COOKIES_MAIN")
-
+bing_cookies_main = os.getenv("BING_COOKIES_MAIN")
+os.environ["BING_COOKIES"] = bing_cookies_main
 
 def get_event_on_date(date):
     events = []
