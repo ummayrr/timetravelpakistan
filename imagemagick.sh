@@ -93,4 +93,17 @@ fi
 
 done
 
+for edited_image in "$output_dir"/*.*; do
+    base_name=$(basename "$edited_image")
+    output_jpg="$output_dir/${base_name%.*}".jpg
+
+    convert "$edited_image" "$output_jpg"
+done
+
+for edited_image in "$output_dir"/*.*; do
+    if [[ "$edited_image" != *.jpg ]]; then
+        rm "$edited_image"
+    fi
+done
+
 rm -f "$image_dir"/*.*
