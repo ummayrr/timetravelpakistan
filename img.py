@@ -53,7 +53,7 @@ for i in range(1, num_files+1):
             out_file.write(response.content)
 
         file_size = os.path.getsize(os.path.join(download_directory, filename))
-        if file_size < 20 * 1024:  # 20KB
+        if file_size < 30 * 1024:  # 20KB
             os.remove(os.path.join(download_directory, filename))
             print(f'Deleted: {os.path.join(download_directory, filename)} due to chhota size.')
             start_index += 1
