@@ -10,6 +10,7 @@ from datetime import datetime
 import os
 from sydney import SydneyClient
 from dotenv import load_dotenv
+import pytz
 
 load_dotenv()
 
@@ -70,7 +71,8 @@ def convert_date_format(date):
 async def main():
     while True:
         try:
-            date = datetime.now().strftime('%m/%d')
+            pkt = pytz.timezone('Asia/Karachi')
+            date = datetime.now(pkt).strftime('%m/%d')
             date_converted = convert_date_format(date)
 
             # Scraper 1
