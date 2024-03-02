@@ -1,4 +1,4 @@
-import express from "express";
+//import express from "express";
 import { CronJob, CronTime } from "cron";
 import { IgApiClient } from "instagram-private-api";
 import { promisify } from "util";
@@ -10,12 +10,12 @@ console.log(process.env.INSTA_USERNAME);
 const app = express();
 const readFileAsync = promisify(readFile);
 
-app.use(express.static("public"));
-app.listen(3000, function () {});
+//app.use(express.static("public"));
+//app.listen(3000, function () {});
 
-app.get("/", function (request, response) {
-  response.send('chal raha hai bhai');
-});
+//app.get("/", function (request, response) {
+ // response.send('chal raha hai bhai');
+//});
 
 let imageIndex = 1;
 
