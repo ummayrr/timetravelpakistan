@@ -14,6 +14,14 @@ for input_image in "$image_dir"/*.*; do
     base_name=$(basename "$input_image")
     output_image="$output_dir/${base_name%.*}"_edited."${base_name##*.}"
 
+    read width height <<< $(identify -format '%w %h' "$input_image")
+
+overlay_size="400x400"
+title_size="500x500"
+corner_size="50x50"
+moon_size="100x100"
+
+
     if [ "$is_black" = "true" ]; then
         # Black edit
         overlay_image="assets/black/onthisday.png"
@@ -60,16 +68,16 @@ for input_image in "$image_dir"/*.*; do
 
     fi
 
-    convert $overlay_image -resize 120% $overlay_edit
-    convert $title -resize 120% $titleedit
-    convert $corner_image1 -resize 210% $corner_image1edit
-    convert $corner_image2 -resize 210% $corner_image2edit
-    convert $corner_image3 -resize 210% $corner_image3edit
-    convert $corner_image4 -resize 210% $corner_image4edit
-    convert $moon -resize 20% $moonedit
+    convert $overlay_image -resize $overlay_size $overlay_edit
+    convert $title -resize $title_size $titleedit
+    convert $corner_image1 -resize $corner_size $corner_image1edit
+    convert $corner_image2 -resize $corner_size $corner_image2edit
+    convert $corner_image3 -resize $corner_size $corner_image3edit
+    convert $corner_image4 -resize $corner_size $corner_image4edit
+    convert $moon -resize $moon_size $moonedit
 
-    convert "$output_image" "$overlay_edit" -geometry +30+30 -gravity south -composite "$output_image"
-    convert "$output_image" "$titleedit" -geometry +0+30 -gravity north -composite "$output_image"
+    convert "$output_image" "$overlay_edit" -geometry +10+50 -gravity south -composite "$output_image"
+    convert "$output_image" "$titleedit" -geometry +0+50 -gravity north -composite "$output_image"
     convert "$output_image" -modulate 110,102,100 -sharpen 0x1.0 "$output_image"
 
     convert "$output_image" "$corner_image1edit" -geometry +80+118 -gravity southwest -composite "$output_image"
@@ -87,9 +95,9 @@ for input_image in "$image_dir"/*.*; do
 
     if [ "$is_black" = "true" ]; then
         is_black="false"
-else
+    else
         is_black="true"
-fi
+    fi
 
 done
 
@@ -105,5 +113,3 @@ for edited_image in "$output_dir"/*.*; do
         rm "$edited_image"
     fi
 done
-
-rm -f "$image_dir"/*.*
