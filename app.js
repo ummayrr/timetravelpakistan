@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 console.log(process.env.INSTA_USERNAME);
-const app = express();
+//const app = express();
 const readFileAsync = promisify(readFile);
 
 //app.use(express.static("public"));
