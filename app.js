@@ -22,28 +22,33 @@ let imageIndex = 1;
 const username = process.env.INSTA_USERNAME;
 const password = process.env.INSTA_PASSWORD;
 
+    const ig = new IgApiClient();
+    ig.state.generateDevice(username);
+    await ig.simulate.preLoginFlow();
+    const user = await ig.account.login(username, password);
+
 function calculateInterval(totalPosts) {
-  let interval; 
+  let interval;
   if (totalPosts >= 14) {
-    interval = 60; // 1 
+    interval = 60; // 1
   } else if (totalPosts >= 10) {
-    interval = 90; // 1.5 
+    interval = 90; // 1.5
   } else if (totalPosts >= 8) {
-    interval = 120; // 2 
+    interval = 120; // 2
   } else if (totalPosts >= 6) {
-    interval = 150; // 2.5 
+    interval = 150; // 2.5
   } else if (totalPosts >= 4) {
-    interval = 180; // 3 
+    interval = 180; // 3
   } else if (totalPosts == 3) {
-    interval = 210; // 3.5 
+    interval = 210; // 3.5
   } else if (totalPosts == 2) {
-    interval = 300; // 5 
+    interval = 300; // 5
   } else {
-    interval = 330; // 5.5 
+    interval = 330; // 5.5
   }
 
   //5-20 min
-  const randomInterval = Math.floor(Math.random() * (interval + 20 - interval + 5) + interval + 5);
+  const randomInterval = Math.floor(Math.random() * (interval + 1 - interval + 20) + interval + 20);
   return randomInterval;
 }
 
@@ -53,7 +58,12 @@ let postEveryMinute = new CronJob(
   `*/${randomInterval} * * * *`,
   function () {
     console.log("cron shuru bhai");
-    instagramPost();
+    if (imageIndex <= totalPosts) {
+      instagramPost();
+    } else {
+      console.log("kaam tamam bhai");
+      this.stop();
+    }
   },
   true
 );
@@ -61,9 +71,6 @@ let postEveryMinute = new CronJob(
 async function instagramPost() {
   try {
     console.log("kaam karne ki koshish start bhai");
-    const ig = new IgApiClient();
-    ig.state.generateDevice(username);
-    const user = await ig.account.login(username, password);
 
     const imagePath = `edited/image${imageIndex}_edited.jpg`;
     const captionPath = `text${imageIndex}.txt`;
@@ -75,14 +82,21 @@ async function instagramPost() {
     });
     console.log("kaam hogaya bhai");
 
+
     imageIndex++;
     totalPosts = readdirSync('edited').length;
     randomInterval = calculateInterval(totalPosts);
 
+    postEveryMinute.stop();
     postEveryMinute.setTime(new CronTime(`*/${randomInterval} * * * *`));
 
-    // agli post
-    console.log(`agli post after ${randomInterval} minutes`);
+    if (imageIndex <= totalPosts) {
+      postEveryMinute.start();
+      console.log(`agli post after ${randomInterval} minutes`);
+    } else {
+      console.log("kaam tamam bhai.");
+    }
+
   } catch (error) {
     console.log(error);
   }
@@ -90,4 +104,3 @@ async function instagramPost() {
 
 postEveryMinute.start();
 console.log(`bilkul shuru wala shuru bhai, agli post after ${randomInterval} minutes`);
-
