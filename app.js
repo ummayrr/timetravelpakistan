@@ -24,7 +24,7 @@ const password = process.env.INSTA_PASSWORD;
 
     const ig = new IgApiClient();
     ig.state.generateDevice(username);
-    await ig.simulate.preLoginFlow();
+//    await ig.simulate.preLoginFlow();
     const user = await ig.account.login(username, password);
 
 function calculateInterval(totalPosts) {
