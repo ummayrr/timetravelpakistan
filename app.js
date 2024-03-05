@@ -22,10 +22,14 @@ let imageIndex = 1;
 const username = process.env.INSTA_USERNAME;
 const password = process.env.INSTA_PASSWORD;
 
-    const ig = new IgApiClient();
-    ig.state.generateDevice(username);
-//    await ig.simulate.preLoginFlow();
-    const user = await ig.account.login(username, password);
+const ig = new IgApiClient();
+ig.state.generateDevice(username);
+async function login() {
+  //await ig.simulate.preLoginFlow();
+  const user = await ig.account.login(username, password);
+}
+login();
+
 
 function calculateInterval(totalPosts) {
   let interval;
@@ -48,14 +52,21 @@ function calculateInterval(totalPosts) {
   }
 
   //5-20 min
-  const randomInterval = Math.floor(Math.random() * (interval + 1 - interval + 20) + interval + 20);
+  const randomInterval = Math.floor(Math.random() * 16 + interval);
   return randomInterval;
+}
+
+function getNextJobTime(minutes) {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + minutes);
+  return date;
 }
 
 let totalPosts = readdirSync('edited').length;
 let randomInterval = calculateInterval(totalPosts);
+let nextJobTime = getNextJobTime(randomInterval);
 let postEveryMinute = new CronJob(
-  `*/${randomInterval} * * * *`,
+  nextJobTime,
   function () {
     console.log("cron shuru bhai");
     if (imageIndex <= totalPosts) {
@@ -88,7 +99,8 @@ async function instagramPost() {
     randomInterval = calculateInterval(totalPosts);
 
     postEveryMinute.stop();
-    postEveryMinute.setTime(new CronTime(`*/${randomInterval} * * * *`));
+    nextJobTime = getNextJobTime(randomInterval);
+    postEveryMinute.setTime(new CronTime(nextJobTime));
 
     if (imageIndex <= totalPosts) {
       postEveryMinute.start();
