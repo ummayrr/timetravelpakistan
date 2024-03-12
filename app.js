@@ -36,19 +36,19 @@ function calculateInterval(totalPosts) {
   if (totalPosts >= 14) {
     interval = 60; // 1
   } else if (totalPosts >= 10) {
-    interval = 90; // 1.5
+    interval = 100; // 1.6
   } else if (totalPosts >= 8) {
-    interval = 120; // 2
-  } else if (totalPosts >= 6) {
     interval = 150; // 2.5
-  } else if (totalPosts >= 4) {
+  } else if (totalPosts >= 6) {
     interval = 180; // 3
+  } else if (totalPosts >= 4) {
+    interval = 240; //4 
   } else if (totalPosts == 3) {
-    interval = 210; // 3.5
+    interval = 360; // 6
   } else if (totalPosts == 2) {
-    interval = 300; // 5
+    interval = 600; // 10
   } else {
-    interval = 330; // 5.5
+    interval = 720; // 12
   }
 
   //5-20 min
