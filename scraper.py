@@ -53,7 +53,7 @@ def get_event_on_date(date):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     tables = pd.read_html(url)
-#yeh pehlay wale kaam se kiun nai nikla? alehda mehnat karni pari 
+#searching for tables again separately
     for table in tables:
         if 'Date' in table.columns:
             for index, row in table.iterrows():
@@ -64,7 +64,7 @@ def get_event_on_date(date):
     return events
 
 def convert_date_format(date):
-# sorry bhai, jugaad hai lekin chalta hai bhai
+# at first look it might seem avoidable, but had to it becz the way i had started it all
     date_object = datetime.strptime(date, "%m/%d")
     return date_object.strftime("%-d %B")
 
@@ -89,7 +89,7 @@ async def main():
 
             for i, div in enumerate(divs):
                 text = div.text.strip()
-                #bhai yeh kaam bhi sahi nahi hai, lekin itna toh chalta hai bhai
+                # well this one's hacked through, not the most solid thing to do but works 
                 if len(text) >  1350:
                     continue
                 if re.match(r'^\d{4}', text):
@@ -121,6 +121,7 @@ async def main():
             for section in events_3.keys():
                 section_content = soup.find('span', {'id': section}).parent.find_next_siblings(['ul', 'ol'])
                 for ul in section_content:
+                    #base headings for date
                     if ul.find_previous_sibling().name == 'h2':
                         break
                     for li in ul.find_all('li'):
@@ -129,7 +130,7 @@ async def main():
                             year = split_text[0].strip()
                             description = re.sub(r'\[\d+\]', '', split_text[1]).strip() if len(split_text) > 1 else ""
                             formatted_date = f"{day} {datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
-                            #bhai yeh kaam sahi code nahi hua hai bhai, lekin chal raha hai bhai
+                            #bro this thing's weird, it can be fixed, go ahead if you want to. but i hacked it through
                             if '(b.' in description:
                                 events_3['Deaths'].append(f"{formatted_date}: Death of {description}")
                             elif section == 'Births':
@@ -163,6 +164,7 @@ async def main():
 
                 async with SydneyClient(style="precise") as sydney:
                     await sydney.reset_conversation(style="precise") #bhai
+                  #hehe
                     question = "Optimize the text for an instagram post, add a little background after the heading with interesting information in simple words. Heading should only include the date, followed by a colon. Censor any strong words like suicide to su__ic__ide, bombing to b__o__mbing, etc. Do not add any emotions, only facts. Text: "  
                     question2 = "Optimize the text for an instagram post, make the text a little simpler, add any useful info and you can cut useless info. There should be heading before. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "
                     image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. If the event is of cricket, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
@@ -173,17 +175,21 @@ async def main():
                         else:
                             question_to_ask = question + event
                         image_prompt = image_prompt_base_text + event
+                  #ocd; but also they work better with reset convos
                         await sydney.reset_conversation(style="precise")
                         image_prompt_response = await sydney.ask(image_prompt, citations=False)
                         image_prompt_response = image_prompt_response.replace('"', '')
+                      #search prompt for google
                         with open(f'text{i}original.txt', 'w') as f:
                             f.write(image_prompt_response)
                         await sydney.reset_conversation(style="precise")
+                     #lil cleaning 🧹 
                         response = await sydney.ask(question_to_ask, citations=False) #nahi chahiye bhai
                         response = re.sub(r'\[\^.\^\]', '', response)
                         response = response.replace('**', '')
                         response = '📅 ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
                         response = response + '\n\n'
+                    #i dont think algorithm will pick these up.   
                         response = response + '📷 #Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
                         with open(f'text{i}.txt', 'w') as f:
                             f.write(response)
@@ -195,8 +201,8 @@ async def main():
                 await main()
             break  # agar kaam khtm hua toh bhai
         except Exception as e:
-            print(f"fukkkkkkkkkkkkk whatever is this: {e}")
-            wait_time = random.uniform(3600, 5400)  # ghanta se le ke ghanta.5 tak bhai
+            print(f"fukkkkkkkkkkkkk whatever is this: {e}") #doesnt happen now fortunately
+            wait_time = random.uniform(3600, 5400)  # retrying after error. 1 hr - 1.5 hr
             print(f"dobara try after {wait_time/3600} hours...")
             await asyncio.sleep(wait_time) 
 
