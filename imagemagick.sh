@@ -8,7 +8,7 @@ black_frame_width=30
 white_frame_width=100
 gap=20
 
-is_black="true"
+is_black="false"
 
 for input_image in "$image_dir"/*.*; do
     base_name=$(basename "$input_image")
@@ -92,12 +92,12 @@ moon_size="100x100"
     convert "$output_image" "$mooneditrotated" -geometry +35+30 -gravity northeast -composite "$output_image"
     convert "$moonedit" -background none -rotate 45 "$mooneditrotated"
     convert "$output_image" "$mooneditrotated" -geometry +10+10 -gravity northwest -composite "$output_image"
-
-    if [ "$is_black" = "true" ]; then
-        is_black="false"
-    else
-        is_black="true"
-    fi
+#black n white alternating toggle 
+#    if [ "$is_black" = "true" ]; then
+#        is_black="false"
+#    else
+#        is_black="true"
+#    fi
 
 done
 
