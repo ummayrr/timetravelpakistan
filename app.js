@@ -83,7 +83,7 @@ async function instagramPost() {
   try {
     console.log("kaam karne ki koshish start bhai");
 
-    const imagePath = `edited/image${imageIndex}_edited.jpg`;
+    const imagePath = `downloads/image${imageIndex}.jpg`;
     const captionPath = `text${imageIndex}.txt`;
     const caption = await readFileAsync(captionPath, 'utf8');
 
