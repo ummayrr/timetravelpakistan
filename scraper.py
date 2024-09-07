@@ -186,10 +186,8 @@ async def main():
 
 
             # combining all events bhai
-          # all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
-            
-            all_events = events_2 + [item for sublist in events_3.values() for item in sublist]
-            ##### removed cricket ESPN ####
+            all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
+
             events_dict = {}
 
             for event in all_events:
@@ -215,7 +213,7 @@ async def main():
                   #hehe
                     question = "Optimize the text for an instagram post, add a little background after the heading with interesting information in simple words. Heading should only include the date, followed by a colon. Censor any strong words like suicide to su__ic__ide, bombing to b__o__mbing, etc. Do not add any emotions, only facts. Text: "  
                     question2 = "Optimize the text for an instagram post, make the text a little simpler, add any useful info and you can cut useless info. There should be heading before. Heading should only include the date, followed by a colon. Do not add any emotions, only facts. Text: "
-                    image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. If the event is of cricket, the prompt should be about event itself. Do not write anything other than the prompt in your response. Text: "
+                    image_prompt_base_text = "Optimize this text into a prompt to get relevant images from a search engine. If 'birth of' or 'death of' is mentioned in text, do not include that, instead include only and only person's name for 'birth of' and 'death of' events. Remove any useless information. Try to be precise and short. Do not write anything other than the prompt in your response. Text: "
 
                     for i, event in enumerate(events, start=1):
                         if event in events_1:
@@ -231,14 +229,14 @@ async def main():
                         with open(f'text{i}original.txt', 'w') as f:
                             f.write(image_prompt_response)
                         await sydney.reset_conversation(style="precise")
-                     #lil cleaning 🧹 
+                     #lil cleaning 🧹
                         response = await sydney.ask(question_to_ask, citations=False) #nahi chahiye bhai
                         response = re.sub(r'\[\^.\^\]', '', response)
                         response = response.replace('**', '')
                         response = '🗓️ ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
                         response = response + '\n\n'
                     #i dont think algorithm will pick these up.   
-                        response = response + 'ðŸ“· #Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
+                        response = response + '#Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
                         with open(f'text{i}.txt', 'w') as f:
                             f.write(response)
                         print(response, end="", flush=True)
