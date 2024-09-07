@@ -108,40 +108,88 @@ async def main():
             # scraper 2
             events_2 = get_event_on_date(date_converted)
 
-            # scraper 3
+               # scraper 3
             date_input = date
             month, day = map(int, date_input.split('/'))
             date_formatted = datetime(year=1, month=month, day=day).strftime('%B_%d')
             url = 'https://en.wikipedia.org/wiki/' + date_formatted
+
             response = requests.get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
-            events_3 = {'Births': [], 'Deaths': [], 'Events': []}
+
+            events_3 = {'Births': [], 'Deaths': [], 'Events': [], 'Holidays': []}
             unique_events = set()
 
-            for section in events_3.keys():
-                section_content = soup.find('span', {'id': section}).parent.find_next_siblings(['ul', 'ol'])
-                for ul in section_content:
-                    #base headings for date
-                    if ul.find_previous_sibling().name == 'h2':
-                        break
-                    for li in ul.find_all('li'):
-                        if 'Pakistan' in li.text and li.text not in unique_events:
-                            split_text = re.split(' – | : ', li.text.strip(), 1)
+            def is_holiday(text):
+                return 'Day' in text or 'Holiday' in text or 'Observance' in text
+
+            def process_section(header, section_name):
+                next_tag = header.find_next(['ul', 'ol'])
+
+                if next_tag:
+                    while next_tag and next_tag.name in ['ul', 'ol']:
+                        for li in next_tag.find_all('li'):
+                            if 'Pakistan' in li.text and li.text not in unique_events:
+                                split_text = re.split(r' â€“ | : ', li.text.strip(), 1)
+
+                                if len(split_text) > 1:
+                                    year = split_text[0].strip()
+                                    description = split_text[1].strip()
+                                else:
+                                    year = ''
+                                    description = split_text[0].strip()
+
+                                formatted_date = f"{day} {datetime(year=1, month=month, day=day).strftime('%B')} {year}"
+
+                                if is_holiday(description):
+                                    events_3['Holidays'].append(f"{formatted_date}: {description}")
+                                elif '(b.' in description:
+                                    events_3['Deaths'].append(f"{formatted_date}: Death of {description}")
+                                elif section_name == 'Births':
+                                    events_3['Births'].append(f"{formatted_date}: Birth of {description}")
+                                else:
+                                    events_3['Events'].append(f"{formatted_date}: {description}")
+
+                                unique_events.add(li.text)
+                        next_tag = next_tag.find_next(['ul', 'ol'])
+
+            def process_remaining_as_events():
+                all_list_items = soup.find_all('li')
+                for li in all_list_items:
+                    if 'Pakistan' in li.text and li.text not in unique_events:
+                        split_text = re.split(r' â€“ | : ', li.text.strip(), 1)
+
+                        if len(split_text) > 1:
                             year = split_text[0].strip()
-                            description = re.sub(r'\[\d+\]', '', split_text[1]).strip() if len(split_text) > 1 else ""
-                            formatted_date = f"{day} {datetime(year=int(year), month=month, day=1).strftime('%B')} {year}"
-                            #bro this thing's weird, it can be fixed, go ahead if you want to. but i hacked it through
-                            if '(b.' in description:
-                                events_3['Deaths'].append(f"{formatted_date}: Death of {description}")
-                            elif section == 'Births':
-                                events_3['Births'].append(f"{formatted_date}: Birth of {description}")
-                            else:
-                                events_3['Events'].append(f"{formatted_date}: {description}")
-                            unique_events.add(li.text)
+                            description = split_text[1].strip()
+                        else:
+                            year = ''
+                            description = split_text[0].strip()
+
+                        formatted_date = f"{day} {datetime(year=1, month=month, day=day).strftime('%B')} {year}"
+                        events_3['Events'].append(f"{formatted_date}: {description}")
+                        unique_events.add(li.text)
+
+            headers = soup.find_all(['h2', 'h3'])
+
+            for header in headers:
+                section_name = header.get_text(strip=True).lower()
+
+                if 'births' in section_name:
+                    process_section(header, 'Births')
+                elif 'deaths' in section_name:
+                    process_section(header, 'Deaths')
+                elif 'holidays' in section_name or 'observances' in section_name:
+                    process_section(header, 'Holidays')
+
+            process_remaining_as_events()
+
 
             # combining all events bhai
-            all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
-
+          # all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
+            
+            all_events = events_2 + [item for sublist in events_3.values() for item in sublist]
+            ##### removed cricket ESPN ####
             events_dict = {}
 
             for event in all_events:
@@ -187,10 +235,10 @@ async def main():
                         response = await sydney.ask(question_to_ask, citations=False) #nahi chahiye bhai
                         response = re.sub(r'\[\^.\^\]', '', response)
                         response = response.replace('**', '')
-                        response = '📅 ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
+                        response = '🗓️ ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
                         response = response + '\n\n'
                     #i dont think algorithm will pick these up.   
-                        response = response + '📷 #Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
+                        response = response + 'ðŸ“· #Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
                         with open(f'text{i}.txt', 'w') as f:
                             f.write(response)
                         print(response, end="", flush=True)
