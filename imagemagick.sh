@@ -13,7 +13,19 @@ is_black="false"
 for input_image in "$image_dir"/*.*; do
     base_name=$(basename "$input_image")
     output_image="$output_dir/${base_name%.*}"_edited."${base_name##*.}"
+    
+for input_image in "$image_dir"/*.*; do
+    base_name=$(basename "$input_image")
+    
+    if [[ "$input_image" == *.jpg ]]; then
+        continue
+    fi
 
+    outputjpgoriginal="$image_dir/${base_name%.*}.jpg"
+    convert "$input_image" "$outputjpgoriginal"
+    echo "Converted $input_image to $outputjpgoriginal"
+done
+    
     read width height <<< $(identify -format '%w %h' "$input_image")
 
 overlay_size="400x400"
@@ -92,7 +104,7 @@ moon_size="100x100"
     convert "$output_image" "$mooneditrotated" -geometry +35+30 -gravity northeast -composite "$output_image"
     convert "$moonedit" -background none -rotate 45 "$mooneditrotated"
     convert "$output_image" "$mooneditrotated" -geometry +10+10 -gravity northwest -composite "$output_image"
-#black n white alternating toggle 
+# black edit cancelled :(
 #    if [ "$is_black" = "true" ]; then
 #        is_black="false"
 #    else
@@ -113,3 +125,4 @@ for edited_image in "$output_dir"/*.*; do
         rm "$edited_image"
     fi
 done
+
