@@ -186,8 +186,8 @@ async def main():
 
 
             # combining all events bhai
-            all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
-
+    #       all_events = events_1 + events_2 + [item for sublist in events_3.values() for item in sublist]
+            all_events = events_2 + [item for sublist in events_3.values() for item in sublist] ######removed espn######
             events_dict = {}
 
             for event in all_events:
