@@ -233,7 +233,7 @@ async def main():
                         response = await sydney.ask(question_to_ask, citations=False) #nahi chahiye bhai
                         response = re.sub(r'\[\^.\^\]', '', response)
                         response = response.replace('**', '')
-                        response = '🗓️ ' + response + ' 🇵🇰' #kia baat hai bhai (meri jind meri jaan???)
+                        response = '📅 ' + response + ' 🇵🇰' 
                         response = response + '\n\n'
                     #i dont think algorithm will pick these up.   
                         response = response + '#Pakistan #History #OnThisDay #PakistanPolitics #PakistanHistory #Politics #Cricket #PakistanCricketTeam #Sports #ThisDayInHistory #pakistan_pics #historyfacts #historylovers #cricketupdates #pakistandiaries #historypodcast #PakistanCricketBoard #pakistanart #historyclass'
